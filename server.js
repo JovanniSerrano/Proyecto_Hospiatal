@@ -1,74 +1,80 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
 const PORT = 3000;
 
-const MONGO_URI = "mongodb+srv://alanuser:Hospiatal2026@clusterhospiatal.elcsn56.mongodb.net/?appName=ClusterHospiatal";
-
+// Middleware esenciales
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
 
-// --- MODELOS DE MONGODB ---
-const Paciente = mongoose.model('Paciente', new mongoose.Schema({
-    _id: String, nombre: String, curp: String, rfc: String, direccion: String, sangre: String, alergias: String
-}, { collection: 'pacientes' }));
+// 🔌 TU CADENA DE CONEXIÓN REAL A MONGODB ATLAS ☁️
+const MONGO_URI = "mongodb+srv://alanuser:Hospiatal2026@clusterhospiatal.elcsn56.mongodb.net/Hospiatal?retryWrites=true&w=majority&appName=ClusterHospiatal";
 
-const Personal = mongoose.model('Personal', new mongoose.Schema({
-    _id: String, nombre: String, puesto: String, turno: String, telefono: String
-}, { collection: 'personal' }));
-
-const Inventario = mongoose.model('Inventario', new mongoose.Schema({
-    _id: String, producto: String, cantidad: Number, caducidad: String
-}, { collection: 'inventario' }));
-
-const Factura = mongoose.model('Factura', new mongoose.Schema({
-    _id: String, cliente: String, total: Number, fecha: String
-}, { collection: 'facturas' }));
-
-// --- CONEXIÓN A BASE DE DATOS ---
 mongoose.connect(MONGO_URI)
-    .then(() => console.log("🚀 Conexión exitosa a la Base de Datos 'Hospiatal' en MongoDB Atlas"))
-    .catch(err => console.error("❌ Error de conexión a MongoDB:", err));
+    .then(() => console.log('🔌 Conectado con éxito a MongoDB Atlas desde el Servidor API'))
+    .catch(err => console.error('❌ Error crítico de conexión a Atlas:', err));
 
-// --- RUTAS DE LA API (CRUD) ---
+// --- DECLARACIÓN DE MODELOS DINÁMICOS CORREGIDOS ---
+const Paciente = mongoose.model('pacientes', new mongoose.Schema({ _id: String }, { strict: false }), 'pacientes');
+const Doctor = mongoose.model('doctores', new mongoose.Schema({ _id: String }, { strict: false }), 'doctores'); 
+const Inventario = mongoose.model('inventarios', new mongoose.Schema({ _id: String }, { strict: false }), 'inventarios'); 
+const Factura = mongoose.model('facturas', new mongoose.Schema({ _id: String }, { strict: false }), 'facturas');
 
-// PACIENTES
-app.get('/api/pacientes', async (req, res) => { res.json(await Paciente.find()); });
-app.post('/api/pacientes', async (req, res) => {
-    try { await new Paciente(req.body).save(); res.json({ mensaje: '✅ Paciente guardado en MongoDB' }); }
-    catch { res.status(500).json({ mensaje: '❌ Error al guardar paciente' }); }
+// Función auxiliar para mapear el parámetro de la URL al modelo de Mongoose
+const obtenerModelo = (tipo) => {
+    if (tipo === 'pacientes') return Paciente;
+    if (tipo === 'doctores') return Doctor;
+    if (tipo === 'inventario') return Inventario; // Mantiene el formato de tu fetch de la URL
+    if (tipo === 'facturas') return Factura;
+    return null;
+};
+
+// --- RUTAS DE LA API (CRUD COMPLETO) ---
+
+// 1. OBTENER TODOS LOS DOCUMENTOS DE UNA COLECCIÓN (GET)
+app.get('/api/:coleccion', async (req, res) => {
+    try {
+        const Modelo = obtenerModelo(req.params.coleccion);
+        if (!Modelo) return res.status(400).json({ error: 'Colección no válida' });
+        
+        const registros = await Modelo.find({});
+        res.json(registros);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al consultar Atlas' });
+    }
 });
 
-// PERSONAL
-app.get('/api/personal', async (req, res) => { res.json(await Personal.find()); });
-app.post('/api/personal', async (req, res) => {
-    try { await new Personal(req.body).save(); res.json({ mensaje: '✅ Personal guardado en MongoDB' }); }
-    catch { res.status(500).json({ mensaje: '❌ Error al guardar personal' }); }
+// 2. GUARDAR O ACTUALIZAR UN DOCUMENTO (POST)
+app.post('/api/:coleccion', async (req, res) => {
+    try {
+        const Modelo = obtenerModelo(req.params.coleccion);
+        if (!Modelo) return res.status(400).json({ error: 'Colección no válida' });
+
+        const data = req.body;
+        // Upsert: Si existe lo actualiza, si no existe lo inserta.
+        await Modelo.findByIdAndUpdate(data._id, data, { upsert: true, new: true });
+        res.json({ mensaje: 'Documento sincronizado con éxito en MongoDB Atlas.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al guardar el documento' });
+    }
 });
 
-// INVENTARIO
-app.get('/api/inventario', async (req, res) => { res.json(await Inventario.find()); });
-app.post('/api/inventario', async (req, res) => {
-    try { await new Inventario(req.body).save(); res.json({ mensaje: '✅ Producto guardado en MongoDB' }); }
-    catch { res.status(500).json({ mensaje: '❌ Error al guardar en inventario' }); }
+// 3. ELIMINAR UN DOCUMENTO POR ID (DELETE)
+app.delete('/api/:coleccion/:id', async (req, res) => {
+    try {
+        const Modelo = obtenerModelo(req.params.coleccion);
+        if (!Modelo) return res.status(400).json({ error: 'Colección no válida' });
+
+        await Modelo.findByIdAndDelete(req.params.id);
+        res.json({ mensaje: 'Documento eliminado correctamente de la nube.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al eliminar el documento' });
+    }
 });
 
-// FACTURAS
-app.get('/api/facturas', async (req, res) => { res.json(await Factura.find()); });
-app.post('/api/facturas', async (req, res) => {
-    try { await new Factura(req.body).save(); res.json({ mensaje: '✅ Factura guardada en MongoDB' }); }
-    catch { res.status(500).json({ mensaje: '❌ Error al guardar factura' }); }
-});
-
-// Ruta principal para servir el HTML
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
+// Inicializar el servidor local en el puerto 3000
 app.listen(PORT, () => {
-    console.log(`💻 Servidor web corriendo en http://localhost:${PORT}`);
+    console.log(`🚀 Servidor Backend corriendo en: http://localhost:${PORT}`);
 });

@@ -288,11 +288,11 @@
                 datos.forEach(p => {
                     html += `<tr id="fila-${p._id}">
                         <td><span class="badge">${p._id}</span></td>
-                        <td><strong>${p.nombre}</strong></td>
-                        <td><small>CURP: ${p.curp}<br>RFC: ${p.rfc}</small></td>
-                        <td>${p.direccion}</td>
-                        <td><span class="badge-success">${p.sangre}</span></td>
-                        <td>${p.alergias}</td>
+                        <td><strong>${p.nombre || ''}</strong></td>
+                        <td><small>CURP: ${p.curp || ''}<br>RFC: ${p.rfc || ''}</small></td>
+                        <td>${p.direccion || ''}</td>
+                        <td><span class="badge-success">${p.sangre || ''}</span></td>
+                        <td>${p.alergias || ''}</td>
                         <td>
                             <button type="button" class="btn-action btn-edit" onclick="seleccionarIdManual('${p._id}')">✏️</button>
                             <button type="button" class="btn-action btn-delete" onclick="eliminarRegistro('${p._id}')">🗑️</button>
@@ -305,11 +305,11 @@
                 datos.forEach(d => {
                     html += `<tr id="fila-${d._id}">
                         <td><span class="badge">${d._id}</span></td>
-                        <td><strong>${d.nombre}</strong></td>
-                        <td>${d.rol}</td>
-                        <td>${d.especialidad === 'No registrada' ? `<em style="color:#aaa">${d.especialidad}</em>` : d.especialidad}</td>
-                        <td>${d.cedula}</td>
-                        <td>${d.direccion}</td>
+                        <td><strong>${d.nombre || ''}</strong></td>
+                        <td>${d.rol || ''}</td>
+                        <td>${!d.especialidad || d.especialidad === 'No registrada' ? `<em style="color:#aaa">No registrada</em>` : d.especialidad}</td>
+                        <td>${d.cedula || 'N/A'}</td>
+                        <td>${d.direccion || ''}</td>
                         <td>
                             <button type="button" class="btn-action btn-edit" onclick="seleccionarIdManual('${d._id}')">✏️</button>
                             <button type="button" class="btn-action btn-delete" onclick="eliminarRegistro('${d._id}')">🗑️</button>
@@ -322,13 +322,14 @@
                 datos.forEach(i => {
                     let stockNum = parseInt(i.stock) || 0;
                     let stockColor = stockNum <= 80 ? '#b91c1c' : '#1e293b';
+                    // Corregido: i.cat -> i.categoria / i.cad -> i.caducidad (Para coincidir con tu formulario y Atlas)
                     html += `<tr id="fila-${i._id}">
                         <td><span class="badge">${i._id}</span></td>
-                        <td><strong>${i.nombre}</strong></td>
-                        <td>${i.cat}</td>
-                        <td style="font-weight:bold; color:${stockColor}">${i.stock}</td>
-                        <td>${i.cad}</td>
-                        <td style="font-weight:bold;">${i.precio}</td>
+                        <td><strong>${i.nombre || i.articulo || ''}</strong></td>
+                        <td>${i.categoria || i.cat || ''}</td>
+                        <td style="font-weight:bold; color:${stockColor}">${i.stock || ''}</td>
+                        <td>${i.caducidad || i.cad || ''}</td>
+                        <td style="font-weight:bold;">${i.precio || ''}</td>
                         <td>
                             <button type="button" class="btn-action btn-edit" onclick="seleccionarIdManual('${i._id}')">✏️</button>
                             <button type="button" class="btn-action btn-delete" onclick="eliminarRegistro('${i._id}')">🗑️</button>
@@ -346,11 +347,11 @@
 
                     html += `<tr id="fila-${f._id}">
                         <td><span class="badge">${f._id}</span></td>
-                        <td><span class="badge">${f.paciente_id}</span></td>
-                        <td>${f.rfc}</td>
-                        <td>${f.concepto}</td>
-                        <td style="font-weight:bold;">${f.total}</td>
-                        <td><span class="${estadoClass}">${f.estado}</span></td>
+                        <td><span class="badge">${f.paciente_id || f.id_paciente || ''}</span></td>
+                        <td>${f.rfc || ''}</td>
+                        <td>${f.concepto || ''}</td>
+                        <td style="font-weight:bold;">${f.total || ''}</td>
+                        <td><span class="${estadoClass}">${f.estado || ''}</span></td>
                         <td>
                             <button type="button" class="btn-action btn-edit" onclick="seleccionarIdManual('${f._id}')">✏️</button>
                             <button type="button" class="btn-action btn-delete" onclick="eliminarRegistro('${f._id}')">🗑️</button>
@@ -425,14 +426,14 @@
                     document.getElementById('d-direccion').value = encontrado.direccion || '';
                 } 
                 else if (tipoColeccionActual === 'inventario') {
-                    document.getElementById('i-articulo').value = encontrado.nombre || '';
-                    document.getElementById('i-categoria').value = encontrado.cat || '';
+                    document.getElementById('i-articulo').value = encontrado.nombre || encontrado.articulo || '';
+                    document.getElementById('i-categoria').value = encontrado.categoria || encontrado.cat || '';
                     document.getElementById('i-stock').value = encontrado.stock || '';
-                    document.getElementById('i-caducidad').value = encontrado.cad || '';
+                    document.getElementById('i-caducidad').value = encontrado.caducidad || encontrado.cad || '';
                     document.getElementById('i-precio').value = encontrado.precio || '';
                 } 
                 else if (tipoColeccionActual === 'facturas') {
-                    document.getElementById('f-paciente').value = encontrado.paciente_id || '';
+                    document.getElementById('f-paciente').value = encontrado.paciente_id || encontrado.id_paciente || '';
                     document.getElementById('f-rfc').value = encontrado.rfc || '';
                     document.getElementById('f-concepto').value = encontrado.concepto || '';
                     document.getElementById('f-total').value = encontrado.total || '';
@@ -462,9 +463,9 @@
             }
             else if (tipoColeccionActual === 'inventario') {
                 nuevoDoc.nombre = document.getElementById('i-articulo').value;
-                nuevoDoc.cat = document.getElementById('i-categoria').value;
+                nuevoDoc.categoria = document.getElementById('i-categoria').value;
                 nuevoDoc.stock = document.getElementById('i-stock').value;
-                nuevoDoc.cad = document.getElementById('i-caducidad').value;
+                nuevoDoc.caducidad = document.getElementById('i-caducidad').value;
                 nuevoDoc.precio = document.getElementById('i-precio').value;
             }
             else if (tipoColeccionActual === 'facturas') {
