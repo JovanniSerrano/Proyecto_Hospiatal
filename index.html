@@ -27,7 +27,6 @@
             text-align: center; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
         }
-        /* ESPACIO 1: Estilo para ima1.png */
         .header-logo { 
             max-width: 130px; 
             height: auto; 
@@ -47,7 +46,6 @@
 
         #pantalla-presentacion { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); text-align: center; width: 100%; border-top: 5px solid var(--azul-pastel); }
         
-        /* ESPACIO 2: Estilo para ima2.png */
         .welcome-logo {
             max-width: 150px;
             height: auto;
@@ -60,7 +58,6 @@
         .card-feature { background: var(--bg-light); padding: 25px; border-radius: 8px; border-top: 4px solid var(--verde-pastel-borde); text-align: left; position: relative; }
         .card-feature h3 { margin-top: 0; color: var(--texto-dark); font-size: 16px; }
         
-        /* ESPACIO 3: Estilo para ima3.png */
         .card-logo {
             max-width: 45px;
             float: right;
@@ -75,7 +72,6 @@
         .form-header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--azul-pastel-claro); padding-bottom: 8px; margin-bottom: 15px; }
         .form-container h2 { font-size: 18px; color: var(--azul-pastel-oscuro); margin: 0; }
         
-        /* ESPACIO 4: Estilo para ima4.png */
         .form-logo {
             max-width: 50px;
             height: auto;
@@ -110,7 +106,6 @@
         footer { background-color: #1e293b; color: #94a3b8; text-align: center; padding: 25px; font-size: 13px; margin-top: auto; border-top: 4px solid var(--verde-pastel-borde); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
         footer p { margin: 4px 0; }
         
-        /* ESPACIO 5: Estilo para ima5.png */
         .footer-logo { width: 65px; height: auto; }
 
         @media (min-width: 900px) {
@@ -207,7 +202,8 @@
     </footer>
 
     <script>
-        const API_URL = "https://proyecto-hospiatal.onrender.com/api";        let tipoColeccionActual = '';
+        const API_URL = "https://proyecto-hospiatal.onrender.com/api";        
+        let tipoColeccionActual = '';
         let registrosCargadosEnMemoria = [];
 
         function irAInicio() {
@@ -321,7 +317,6 @@
                 datos.forEach(i => {
                     let stockNum = parseInt(i.stock) || 0;
                     let stockColor = stockNum <= 80 ? '#b91c1c' : '#1e293b';
-                    // Corregido: i.cat -> i.categoria / i.cad -> i.caducidad (Para coincidir con tu formulario y Atlas)
                     html += `<tr id="fila-${i._id}">
                         <td><span class="badge">${i._id}</span></td>
                         <td><strong>${i.nombre || i.articulo || ''}</strong></td>
@@ -387,11 +382,11 @@
             contenedor.innerHTML = '<div class="loading">Consultando clúster MongoDB Atlas...</div>';
 
             try {
-                const respuesta = await fetch(`${API_BASE_URL}/${tipoColeccion}`);
+                const respuesta = await fetch(`${API_URL}/${tipoColeccion}`);
                 registrosCargadosEnMemoria = await respuesta.json();
                 contenedor.innerHTML = generarTabla(registrosCargadosEnMemoria, tipoColeccion);
             } catch (error) {
-                contenedor.innerHTML = '<div class="loading" style="color: #dc2626; font-weight: bold;">❌ Error de conexión con el Servidor Backend. Asegúrate de correr node server.js</div>';
+                contenedor.innerHTML = '<div class="loading" style="color: #dc2626; font-weight: bold;">❌ Error de conexión con el Servidor Backend. Asegúrate de que el servidor en Render esté activo.</div>';
             }
         }
 
@@ -476,7 +471,7 @@
             }
 
             try {
-                const respuesta = await fetch(`${API_BASE_URL}/${tipoColeccionActual}`, {
+                const respuesta = await fetch(`${API_URL}/${tipoColeccionActual}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(nuevoDoc)
@@ -495,7 +490,7 @@
         async function eliminarRegistro(id) {
             if (confirm(`¿Seguro que deseas eliminar el documento ${id} de MongoDB Atlas?`)) {
                 try {
-                    const respuesta = await fetch(`${API_BASE_URL}/${tipoColeccionActual}/${id}`, {
+                    const respuesta = await fetch(`${API_URL}/${tipoColeccionActual}/${id}`, {
                         method: 'DELETE'
                     });
                     const resultado = await respuesta.json();
