@@ -1,80 +1,141 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const cors = require('cors'); // Habilitamos la librería de seguridad
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// Middlewares esenciales
-app.use(cors());
+// ==========================================
+// 🔥 MIDDLEWARES (CONFIGURACIÓN DE PERMISOS)
+// ==========================================
+app.use(cors()); // <-- ESTA LÍNEA ES LA QUE QUITA EL ERROR ROJO
 app.use(express.json());
 
-// 🔌 CONEXIÓN DIRECTA A TU MONGODB ATLAS ☁️
-const MONGO_URI = "mongodb+srv://alanuser:Hospiatal2026@clusterhospiatal.elcsn56.mongodb.net/Hospiatal?retryWrites=true&w=majority&appName=ClusterHospiatal";
+// ==========================================
+// 🔌 CONEXIÓN A MONGO DB ATLAS
+// ==========================================
+// Reemplaza esta URL por tu cadena de conexión real si es diferente
+const MONGO_URI = "mongodb+srv://alan:alan123@cluster0.v8v6z.mongodb.net/Hospiatal?retryWrites=true&w=share";
 
 mongoose.connect(MONGO_URI)
-    .then(() => console.log('🔌 Conectado con éxito a MongoDB Atlas (Base de datos: Hospiatal)'))
-    .catch(err => console.error('❌ Error crítico de conexión a Atlas:', err));
+    .then(() => console.log('🍃 Conectado exitosamente a MongoDB Atlas (Base: Hospiatal)'))
+    .catch(err => console.error('❌ Error de conexión a MongoDB:', err));
 
-// --- DECLARACIÓN DE MODELOS EXACTOS DE TU ATLAS ---
-const Paciente = mongoose.model('pacientes', new mongoose.Schema({ _id: String }, { strict: false }), 'pacientes');
-const Doctor = mongoose.model('doctores', new mongoose.Schema({ _id: String }, { strict: false }), 'doctores'); 
-const Inventario = mongoose.model('inventarios', new mongoose.Schema({ _id: String }, { strict: false }), 'inventarios'); 
-const Factura = mongoose.model('facturas', new mongoose.Schema({ _id: String }, { strict: false }), 'facturas');
+// ==========================================
+// 📊 DEFINICIÓN DE ESQUEMAS Y MODELOS
+// ==========================================
 
-// Función auxiliar para conectar las peticiones de tu Frontend con los Modelos
-const obtenerModelo = (tipo) => {
-    // Si tu HTML pide /api/pacientes, /api/doctores, /api/inventarios o /api/facturas
-    if (tipo === 'pacientes') return Paciente;
-    if (tipo === 'doctores' || tipo === 'personal') return Doctor; 
-    if (tipo === 'inventarios' || tipo === 'inventario') return Inventario; 
-    if (tipo === 'facturas') return Factura;
-    return null;
+// Esquema de Doctores (Personal Médico)
+const doctorSchema = new mongoose.Schema({
+    _id: String,
+    nombre: String,
+    rol: String,
+    especialidad: String,
+    cedula: String,
+    direccion: String
+}, { versionKey: false });
+
+const Doctor = mongoose.model('Doctor', doctorSchema, 'doctores');
+
+// Esquema de Pacientes
+const pacienteSchema = new mongoose.Schema({
+    _id: String,
+    nombre: String,
+    curp: String,
+    rfc: String,
+    direccion: String,
+    sangre: String,
+    alergias: String
+}, { versionKey: false });
+
+const Paciente = mongoose.model('Paciente', pacienteSchema, 'pacientes');
+
+// Esquema de Inventario
+const inventarioSchema = new mongoose.Schema({
+    _id: String,
+    articulo: String,
+    categoria: String,
+    stock: String,
+    caducidad: String,
+    precio: String
+}, { versionKey: false });
+
+const Inventario = mongoose.model('Inventario', inventarioSchema, 'inventarios');
+
+// Esquema de Facturas
+const facturaSchema = new mongoose.Schema({
+    _id: String,
+    paciente_id: String,
+    rfc: String,
+    concepto: String,
+    total: String,
+    estado: String
+}, { versionKey: false });
+
+const Factura = mongoose.model('Factura', facturaSchema, 'facturas');
+
+
+// ==========================================
+// 🛣️ RUTAS DE LA API (CRUD COMPLETO)
+// ==========================================
+
+// --- CONTROLADOR GENÉRICO PARA AGILIZAR RUTAS ---
+const mapearModelos = {
+    doctores: Doctor,
+    pacientes: Paciente,
+    inventario: Inventario,
+    facturas: Factura
 };
 
-// --- RUTAS DE LA API (CRUD) ---
+// Ruta Base de prueba
+app.get('/api', (req, res) => {
+    res.json({ mensaje: "🚀 Servidor backend activo en la nube de Render corriendo API Hospiatal" });
+});
 
-// 1. OBTENER DATOS (GET)
+// GET: Obtener todos los registros de una colección
 app.get('/api/:coleccion', async (req, res) => {
+    const Modelo = mapearModelos[req.params.coleccion];
+    if (!Modelo) return res.status(404).json({ error: "Colección no encontrada" });
+
     try {
-        const Modelo = obtenerModelo(req.params.coleccion);
-        if (!Modelo) return res.status(400).json({ error: 'Colección no válida en la API' });
-        
-        const registros = await Modelo.find({});
-        res.json(registros);
+        const datos = await Modelo.find();
+        res.json(datos);
     } catch (error) {
-        res.status(500).json({ error: 'Error al consultar MongoDB Atlas' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// 2. INSERTAR O ACTUALIZAR (POST)
+// POST: Insertar o actualizar un documento
 app.post('/api/:coleccion', async (req, res) => {
-    try {
-        const Modelo = obtenerModelo(req.params.coleccion);
-        if (!Modelo) return res.status(400).json({ error: 'Colección no válida' });
+    const Modelo = mapearModelos[req.params.coleccion];
+    if (!Modelo) return res.status(404).json({ error: "Colección no encontrada" });
 
-        const data = req.body;
-        await Modelo.findByIdAndUpdate(data._id, data, { upsert: true, new: true });
-        res.json({ mensaje: 'Documento sincronizado correctamente en la nube.' });
+    try {
+        const { _id } = req.body;
+        // Si ya existe el ID, lo actualiza (Upsert)
+        const documento = await Modelo.findByIdAndUpdate(_id, req.body, { new: true, upsert: true });
+        res.json({ mensaje: "Sincronizado correctamente con MongoDB Atlas", documento });
     } catch (error) {
-        res.status(500).json({ error: 'Error al guardar en la nube' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// 3. ELIMINAR (DELETE)
+// DELETE: Eliminar un documento por ID
 app.delete('/api/:coleccion/:id', async (req, res) => {
-    try {
-        const Modelo = obtenerModelo(req.params.coleccion);
-        if (!Modelo) return res.status(400).json({ error: 'Colección no válida' });
+    const Modelo = mapearModelos[req.params.coleccion];
+    if (!Modelo) return res.status(404).json({ error: "Colección no encontrada" });
 
+    try {
         await Modelo.findByIdAndDelete(req.params.id);
-        res.json({ mensaje: 'Documento eliminado correctamente de Atlas.' });
+        res.json({ mensaje: `Documento ${req.params.id} eliminado correctamente.` });
     } catch (error) {
-        res.status(500).json({ error: 'Error al eliminar el documento' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Iniciar el backend
+// ==========================================
+// 🚀 ARRANQUE DEL SERVIDOR
+// ==========================================
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en: http://localhost:${PORT}`);
+    console.log(`🚀 Servidor backend activo en el puerto ${PORT}`);
 });
