@@ -27,7 +27,7 @@
             text-align: center; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
         }
-        /* ESPACIO 1: Logo del Header */
+        /* ESPACIO 1: Estilo para ima1.png */
         .header-logo { 
             max-width: 130px; 
             height: auto; 
@@ -47,7 +47,7 @@
 
         #pantalla-presentacion { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); text-align: center; width: 100%; border-top: 5px solid var(--azul-pastel); }
         
-        /* ESPACIO 2: Logo centro de bienvenida */
+        /* ESPACIO 2: Estilo para ima2.png */
         .welcome-logo {
             max-width: 150px;
             height: auto;
@@ -60,7 +60,7 @@
         .card-feature { background: var(--bg-light); padding: 25px; border-radius: 8px; border-top: 4px solid var(--verde-pastel-borde); text-align: left; position: relative; }
         .card-feature h3 { margin-top: 0; color: var(--texto-dark); font-size: 16px; }
         
-        /* ESPACIO 3: Logo decorativo en tarjetas */
+        /* ESPACIO 3: Estilo para ima3.png */
         .card-logo {
             max-width: 45px;
             float: right;
@@ -75,7 +75,7 @@
         .form-header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--azul-pastel-claro); padding-bottom: 8px; margin-bottom: 15px; }
         .form-container h2 { font-size: 18px; color: var(--azul-pastel-oscuro); margin: 0; }
         
-        /* ESPACIO 4: Logo en esquina del formulario */
+        /* ESPACIO 4: Estilo para ima4.png */
         .form-logo {
             max-width: 50px;
             height: auto;
@@ -110,7 +110,7 @@
         footer { background-color: #1e293b; color: #94a3b8; text-align: center; padding: 25px; font-size: 13px; margin-top: auto; border-top: 4px solid var(--verde-pastel-borde); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
         footer p { margin: 4px 0; }
         
-        /* ESPACIO 5: Logo del Footer */
+        /* ESPACIO 5: Estilo para ima5.png */
         .footer-logo { width: 65px; height: auto; }
 
         @media (min-width: 900px) {
@@ -121,9 +121,8 @@
 </head>
 <body>
 
-    <!-- 1. LOGO EN EL HEADER -->
     <header>
-        <img src="logosinfondo.png" class="header-logo" alt="Logo Encabezado">
+        <img src="ima1.png" class="header-logo" alt="Logo Encabezado">
         <h1>🏥 Panel General - Base de Datos "Hospiatal"</h1>
         <p>Clúster de Sincronización Médica NoSQL en Tiempo Real</p>
     </header>
@@ -139,8 +138,7 @@
     <div class="container workspace">
         
         <section id="pantalla-presentacion">
-            <!-- 2. LOGO EN LA PANTALLA DE BIENVENIDA -->
-            <img src="logosinfondo.png" class="welcome-logo" alt="Logo Bienvenida">
+            <img src="ima2.png" class="welcome-logo" alt="Logo Bienvenida">
             
             <h2>Bienvenido a la Infraestructura de Hospiatal</h2>
             <p style="max-width: 800px; margin: 0 auto; color: #556779;">
@@ -149,18 +147,17 @@
             
             <div class="grid-features">
                 <div class="card-feature">
-                    <!-- 3. LOGO INTEGRADO EN TARJETA DE CARACTERÍSTICA -->
-                    <img src="logosinfondo.png" class="card-logo" alt="Icono Tarjeta">
+                    <img src="ima3.png" class="card-logo" alt="Icono Tarjeta">
                     <h3>📁 Modelo NoSQL Flexible</h3>
                     <p>La base de datos estructurada en MongoDB permite agregar colecciones con esquemas dinámicos sin alterar la disponibilidad global.</p>
                 </div>
                 <div class="card-feature">
-                    <img src="logosinfondo.png" class="card-logo" alt="Icono Tarjeta">
+                    <img src="ima3.png" class="card-logo" alt="Icono Tarjeta">
                     <h3>⚡ Operaciones CRUD en Tiempo Real</h3>
                     <p>Por medio de nuestra API Backend se gestionan las peticiones asíncronas directamente en los documentos distribuidos.</p>
                 </div>
                 <div class="card-feature">
-                    <img src="logosinfondo.png" class="card-logo" alt="Icono Tarjeta">
+                    <img src="ima3.png" class="card-logo" alt="Icono Tarjeta">
                     <h3>🎯 Control Administrativo</h3>
                     <p>Utilice la barra superior para alternar entre las diferentes colecciones del sistema y dar de alta nuevos elementos al clúster.</p>
                 </div>
@@ -177,8 +174,7 @@
                 <div class="form-container">
                     <div class="form-header-flex">
                         <h2 id="formulario-titulo">Formulario Dinámico</h2>
-                        <!-- 4. LOGO EN LA CABECERA DEL FORMULARIO -->
-                        <img src="logosinfondo.png" class="form-logo" alt="Logo Formulario">
+                        <img src="ima4.png" class="form-logo" alt="Logo Formulario">
                     </div>
                     <form id="formulario-alta" onsubmit="event.preventDefault(); guardarElemento();">
                         <div class="form-group">
@@ -199,9 +195,8 @@
 
     </div>
 
-    <!-- 5. LOGO EN EL PIE DE PÁGINA (FOOTER) -->
     <footer>
-        <img src="logosinfondo.png" class="footer-logo" alt="Logo Footer">
+        <img src="ima5.png" class="footer-logo" alt="Logo Footer">
         <div class="footer-info">
             <p><strong>Proyecto:</strong> Control General de Base de Datos - Hospiatal</p>
             <p><strong>Autor:</strong> Serrano Flaco Alan Jovanni</p>
